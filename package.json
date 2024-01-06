@@ -1,0 +1,72 @@
+{
+    "name": "vite-plugin-unit",
+    "version": "0.0.0",
+    "description": "A vite plugin for handling unit.js projects",
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "files": [
+        "./dist/",
+        "./LICENSE.md",
+        "./README.md",
+        "./package.json"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/henryhale/vite-plugin-unit.git"
+    },
+    "keywords": [
+        "vite",
+        "alpine",
+        "ui",
+        "browser"
+    ],
+    "author": {
+        "name": "Henry Hale",
+        "url": "https://github.com/henryhale"
+    },
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/henryhale/vite-plugin-unit/issues"
+    },
+    "homepage": "https://github.com/henryhale/vite-plugin-unit#readme",
+    "type": "module",
+    "scripts": {
+        "build": "tsc -b",
+        "dev": "tsc -w",
+        "lint": "eslint --cache --ext .ts source/ && prettier -c source/",
+        "lint:fix": "eslint --cache --ext .ts source/ --fix && prettier -c -w source/",
+        "prepack": "pnpm build",
+        "prepare": "husky install",
+        "release": "release-it",
+        "test": "echo \"Error: no test specified\""
+    },
+    "engines": {
+        "node": ">=18",
+        "pnpm": ">=8"
+    },
+    "lint-staged": {
+        "*.ts": "pnpm lint:fix"
+    },
+    "prettier": {
+        "printWidth": 120,
+        "tabWidth": 4,
+        "semi": true,
+        "singleQuote": false,
+        "trailingComma": "none"
+    },
+    "devDependencies": {
+        "@release-it/conventional-changelog": "^8.0.1",
+        "@types/node": "^20.10.6",
+        "@typescript-eslint/eslint-plugin": "^6.16.0",
+        "@typescript-eslint/parser": "^6.16.0",
+        "eslint": "^8.56.0",
+        "eslint-plugin-prettier": "^5.1.2",
+        "husky": "^8.0.3",
+        "lint-staged": "^15.2.0",
+        "prettier": "^3.1.1",
+        "release-it": "^17.0.1",
+        "typescript": "^5.3.3",
+        "vite": "^5.0.11"
+    }
+}
