@@ -1,8 +1,9 @@
 /**
  *  vite-plugin-unit
+ *  @description A vite plugin to enable you build websites in units using alpine.js
  *  @author Henry Hale
  *  @license MIT
- *  @url https://github.com/unit-js/vite-plugin-unit
+ *  @url https://github.com/henryhale/vite-plugin-unit
  */
 
 import { existsSync, readFileSync } from "node:fs";
@@ -23,7 +24,7 @@ const defaultOptions: PluginOptions = {
     slot: "#slot#"
 };
 
-export default function plugin(options: Partial<PluginOptions>): Plugin[] {
+export default function plugin(options: Partial<PluginOptions> = {}): Plugin[] {
     const opt = Object.assign({}, defaultOptions, options);
 
     // unit file extension
@@ -108,6 +109,7 @@ export default function plugin(options: Partial<PluginOptions>): Plugin[] {
                         res.statusCode = 200;
                         res.setHeader("Content-Type", "text/html");
                         const contents = await readFile(join(config.root, opt.template), { encoding: "utf-8" });
+                        pathToCode.clear();
                         const compiled = compile(file, await readFile(file, { encoding: "utf-8" }));
                         res.end(contents.replace(opt.slot, compiled));
                     }
@@ -123,7 +125,7 @@ export default function plugin(options: Partial<PluginOptions>): Plugin[] {
                         filePath = filePath.replace(".html", ext);
                         if (existsSync(filePath)) {
                             // print request to the console
-                            log(req.method?.toUpperCase(), req.url, filePath);
+                            log(req.method?.toUpperCase(), req.url, filePath.slice(config?.root?.length || 0));
 
                             // send requested file
                             return await respond(filePath);
@@ -169,11 +171,12 @@ export default function plugin(options: Partial<PluginOptions>): Plugin[] {
              */
             async buildStart(options) {
                 const output = join(__dirname, outputDir);
+
                 /**
                  * Create unit.js compiled output directory
                  */
                 if (existsSync(output)) {
-                    rm(output, { recursive: true, force: true });
+                    await rm(output, { recursive: true, force: true });
                 }
                 await mkdir(outputDir);
 
