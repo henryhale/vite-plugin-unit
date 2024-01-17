@@ -2,7 +2,7 @@
 
 [![npm](https://img.shields.io/npm/v/vite-plugin-unit.svg?style=for-the-badge)](https://www.npmjs.com/package/vite-plugin-unit)
 
-A vite plugin for handling unit.js projects
+A vite plugin to enable you build websites in units using alpine.js
 
 ## installation
 

@@ -1,7 +1,7 @@
 {
     "name": "vite-plugin-unit",
     "version": "0.0.2",
-    "description": "A vite plugin for handling unit.js projects",
+    "description": "A vite plugin to enable you build websites in units using alpine.js",
     "main": "./dist/index.js",
     "module": "./dist/index.js",
     "types": "./dist/index.d.ts",
