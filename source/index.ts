@@ -7,7 +7,7 @@
  */
 
 import { existsSync, readFileSync } from "node:fs";
-import { dirname, extname, join } from "node:path";
+import { dirname, extname, join, resolve } from "node:path";
 import { cp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { log } from "node:console";
 import type { Plugin } from "vite";
@@ -26,6 +26,9 @@ const defaultOptions: PluginOptions = {
 
 export default function plugin(options: Partial<PluginOptions> = {}): Plugin[] {
     const opt = Object.assign({}, defaultOptions, options);
+
+    // https://stackoverflow.com/questions/64963450/dirname-is-not-defined
+    const __dirname = resolve(dirname(""));
 
     // unit file extension
     const ext = ".unit";
