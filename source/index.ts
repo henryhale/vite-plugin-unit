@@ -214,7 +214,7 @@ export default function plugin(options: Partial<PluginOptions> = {}): Plugin[] {
                     }
                     const fileContent = await readFile(filePath, { encoding: "utf-8" });
                     const compiledPage = compile(filePath, fileContent);
-                    const result = template.replace(opt.template, compiledPage);
+                    const result = template.replace(opt.slot, compiledPage);
                     log("build: ", page);
                     return await writeFile(join(outputDir, page.replace(ext, ".html")), result);
                 }
