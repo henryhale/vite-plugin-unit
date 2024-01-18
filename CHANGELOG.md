@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.5](https://github.com/henryhale/vite-plugin-unit/compare/v0.0.4...v0.0.5) (2024-01-18)
+
+
+### Bug Fixes
+
+* inject html in template on build ([014fef8](https://github.com/henryhale/vite-plugin-unit/commit/014fef83fec9cd2c8dfc06abb40988cb4ecf69f4))
+
 ## [0.0.4](https://github.com/henryhale/vite-plugin-unit/compare/v0.0.3...v0.0.4) (2024-01-18)
 
 
