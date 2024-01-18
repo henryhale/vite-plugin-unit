@@ -4,6 +4,8 @@
 
 A vite plugin to enable you build websites in units using alpine.js
 
+Check out the [create-unit](https://github.com/henryhale/create-unit) library for details.
+
 ## installation
 
 ```sh
