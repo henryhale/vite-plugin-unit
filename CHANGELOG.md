@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.0.0](https://github.com/henryhale/vite-plugin-unit/compare/v0.0.5...v1.0.0) (2024-03-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* removed Alpinejs as dependency
+
+- Alpinejs can still be used as per user need but not a default for all
+- Changed default slot identifier to HTML tag `<slot></slot>`
+- Added props to components
+- Update dependencies
+
+### Features
+
+* introducing props in components ([912c237](https://github.com/henryhale/vite-plugin-unit/commit/912c23747754bcc6e0c73590c95de4375b5929ed))
+
 ## [0.0.5](https://github.com/henryhale/vite-plugin-unit/compare/v0.0.4...v0.0.5) (2024-01-18)
 
 
