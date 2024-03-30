@@ -1,6 +1,6 @@
 /**
  *  vite-plugin-unit
- *  @description A vite plugin to enable you build websites in units using alpine.js
+ *  @description A vite plugin to enable you build websites in units.
  *  @author Henry Hale
  *  @license MIT
  *  @url https://github.com/henryhale/vite-plugin-unit
@@ -21,7 +21,7 @@ export type PluginOptions = {
 const defaultOptions: PluginOptions = {
     pages: "pages/",
     template: "template.html",
-    slot: "#slot#"
+    slot: "<slot></slot>"
 };
 
 export default function plugin(options: Partial<PluginOptions> = {}): Plugin[] {
@@ -37,10 +37,22 @@ export default function plugin(options: Partial<PluginOptions> = {}): Plugin[] {
     const srcDir = "src/";
 
     // intermediate output folder for unit.js
-    const outputDir = "./.unit/";
+    const outputDir = ".unit/";
 
-    // regexp to match single html tag
+    // regexp to match single html tag with attributes
     const htmlRegex = /<(.+?) ([/]?|.+?)>/g;
+
+    // import statements
+    const importRegex = /import (.+?) from "(.+?)"(.+?)/g;
+
+    // html tag regexp
+    const tagRegex = /<(.+?)>/;
+
+    // regexp to match attributes in html tag
+    const attrRegex = /(\w+(?:-\w+)*)\s*=\s*["']([^"']+)["']/g;
+
+    // regexp to match placeholders like {text}
+    const valueRegex = /{(\w*)}/g;
 
     // mapping file path to thier contents
     const pathToCode = new Map<string, string>();
@@ -51,10 +63,20 @@ export default function plugin(options: Partial<PluginOptions> = {}): Plugin[] {
         let content = null;
         const nameToPath = new Map<string, string>();
 
+        // create a key-value object from attributes of an html tag
+        function mapAttributes(attr = "") {
+            const map: { [k: string]: string } = {};
+            let match: RegExpExecArray | null;
+            while ((match = attrRegex.exec(attr)) !== null) {
+                map[match[1]] = match[2];
+            }
+            return map;
+        }
+
         // remove all import statements while saving the import names & content
         return (
             code
-                .replace(/import (.+?) from "(.+?)"(.+?)/g, (_, importName, importPath) => {
+                .replace(importRegex, (_, importName, importPath) => {
                     filePath = join(dirname(file), importPath);
                     nameToPath.set(importName, filePath);
                     if (!pathToCode.has(filePath)) {
@@ -67,8 +89,25 @@ export default function plugin(options: Partial<PluginOptions> = {}): Plugin[] {
                 .replace(htmlRegex, (match, tag, attr = "") => {
                     const path = nameToPath.get(tag);
                     if (path) {
+                        // get rid of trailing forward slash
                         if (attr.endsWith("/")) attr = attr.slice(0, -1);
-                        return pathToCode.get(path)!.replace(/<(.+?)>/, (m) => m.slice(0, -1) + " " + attr + ">");
+                        const map = mapAttributes(attr);
+                        return pathToCode
+                            .get(path)!
+                            .replace(valueRegex, (m, key) => {
+                                const value = map[key];
+                                if (value) {
+                                    delete map[key];
+                                    return value;
+                                }
+                                return m;
+                            })
+                            .replace(tagRegex, (m) => {
+                                const others = Object.entries(map).reduce((r, [k, v]) => {
+                                    return r + k + "=" + (/'/.test(v) ? `"${v}"` : `'${v}'`);
+                                }, "");
+                                return m.slice(0, -1) + " " + others + ">";
+                            });
                     }
                     return match;
                 })
@@ -216,7 +255,12 @@ export default function plugin(options: Partial<PluginOptions> = {}): Plugin[] {
                     const compiledPage = compile(filePath, fileContent);
                     const result = template.replace(opt.slot, compiledPage);
                     log("build: ", page);
-                    return await writeFile(join(outputDir, page.replace(ext, ".html")), result);
+                    const fullPath = join(outputDir, page.replace(ext, ".html"));
+                    const dirPath = dirname(fullPath);
+                    if (!existsSync(dirPath)) {
+                        await mkdir(dirPath, { recursive: true });
+                    }
+                    return await writeFile(fullPath, result);
                 }
 
                 /**

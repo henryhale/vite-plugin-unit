@@ -1,7 +1,7 @@
 {
     "name": "vite-plugin-unit",
     "version": "0.0.5",
-    "description": "A vite plugin to enable you build websites in units using alpine.js",
+    "description": "A vite plugin to enable you build websites in units.",
     "main": "./dist/index.js",
     "module": "./dist/index.js",
     "types": "./dist/index.d.ts",
@@ -17,8 +17,11 @@
     },
     "keywords": [
         "vite",
-        "alpine",
+        "static",
+        "site",
+        "static site generator",
         "ui",
+        "website",
         "browser"
     ],
     "author": {
@@ -57,16 +60,16 @@
     },
     "devDependencies": {
         "@release-it/conventional-changelog": "^8.0.1",
-        "@types/node": "^20.10.6",
-        "@typescript-eslint/eslint-plugin": "^6.16.0",
-        "@typescript-eslint/parser": "^6.16.0",
-        "eslint": "^8.56.0",
-        "eslint-plugin-prettier": "^5.1.2",
+        "@types/node": "^20.12.2",
+        "@typescript-eslint/eslint-plugin": "^6.21.0",
+        "@typescript-eslint/parser": "^6.21.0",
+        "eslint": "^8.57.0",
+        "eslint-plugin-prettier": "^5.1.3",
         "husky": "^8.0.3",
-        "lint-staged": "^15.2.0",
-        "prettier": "^3.1.1",
-        "release-it": "^17.0.1",
-        "typescript": "^5.3.3",
-        "vite": "^5.0.11"
+        "lint-staged": "^15.2.2",
+        "prettier": "^3.2.5",
+        "release-it": "^17.1.1",
+        "typescript": "^5.4.3",
+        "vite": "^5.2.7"
     }
 }
