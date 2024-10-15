@@ -45,7 +45,7 @@ type PluginOptions = {
 const defaultOptions = {
     pages: "pages/",
     template: "template.html",
-    slot: "#slot#"
+    slot: "<slot></slot>"
 };
 ```
 
