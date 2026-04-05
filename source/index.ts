@@ -178,10 +178,17 @@ export default function plugin(options: Partial<PluginOptions> = {}): Plugin[] {
 					// folder containing pages
 					const srcDir = join(config.root, opt.pages);
 
+					// strip the base path from the request URL
+					let url = req.url || "";
+					const base = config.base || "/";
+					if (base !== "/" && url.startsWith(base)) {
+						url = "/" + url.slice(base.length);
+					}
+
 					// generate actual file path
 					let filePath = join(
 						srcDir,
-						req.url + (req.url?.endsWith("/") ? "index.html" : "")
+						url + (url?.endsWith("/") ? "index.html" : "")
 					);
 
 					// check if the requested html file does not exist
@@ -202,7 +209,7 @@ export default function plugin(options: Partial<PluginOptions> = {}): Plugin[] {
 
 					// try checking if the requested asset exists in the `src` folder
 					if (filePath.lastIndexOf(".") > -1) {
-						filePath = join(config.root, req.url || "");
+						filePath = join(config.root, url || "");
 						if (existsSync(filePath)) {
 							// direct the file path relative to the `src` folder
 							req.url = filePath;

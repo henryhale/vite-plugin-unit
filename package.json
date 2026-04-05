@@ -1,60 +1,60 @@
 {
-  "name": "vite-plugin-unit",
-  "version": "2.0.0",
-  "description": "A vite plugin to enable you build websites in units.",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "files": [
-    "./dist/",
-    "./LICENSE.md",
-    "./README.md",
-    "./package.json"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/henryhale/vite-plugin-unit.git"
-  },
-  "keywords": [
-    "vite",
-    "static",
-    "site",
-    "static site generator",
-    "ui",
-    "website",
-    "browser"
-  ],
-  "author": {
-    "name": "Henry Hale",
-    "url": "https://github.com/henryhale"
-  },
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/henryhale/vite-plugin-unit/issues"
-  },
-  "homepage": "https://github.com/henryhale/vite-plugin-unit#readme",
-  "type": "module",
-  "scripts": {
-    "build": "tsc -b",
-    "dev": "tsc -w",
-    "lint": "biome check",
-    "lint:fix": "biome check --fix",
-    "prepack": "pnpm build",
-    "prepare": "husky || true",
-    "release": "release-it",
-    "test": "echo \"Error: no test specified\""
-  },
-  "lint-staged": {
-    "*.ts": "pnpm lint:fix"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^2.4.10",
-    "@release-it/conventional-changelog": "^10.0.6",
-    "@types/node": "^25.5.2",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.4.0",
-    "release-it": "^19.2.4",
-    "typescript": "^6.0.2",
-    "vite": "^8.0.3"
-  }
+	"name": "vite-plugin-unit",
+	"version": "1.0.0",
+	"description": "A vite plugin to enable you build websites in units.",
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"./dist/",
+		"./LICENSE.md",
+		"./README.md",
+		"./package.json"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/henryhale/vite-plugin-unit.git"
+	},
+	"keywords": [
+		"vite",
+		"static",
+		"site",
+		"static site generator",
+		"ui",
+		"website",
+		"browser"
+	],
+	"author": {
+		"name": "Henry Hale",
+		"url": "https://github.com/henryhale"
+	},
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/henryhale/vite-plugin-unit/issues"
+	},
+	"homepage": "https://github.com/henryhale/vite-plugin-unit#readme",
+	"type": "module",
+	"scripts": {
+		"build": "tsc -b",
+		"dev": "tsc -w",
+		"lint": "biome check",
+		"lint:fix": "biome check --fix",
+		"prepack": "pnpm build",
+		"prepare": "husky || true",
+		"release": "release-it",
+		"test": "echo \"Error: no test specified\""
+	},
+	"lint-staged": {
+		"*.ts": "pnpm lint:fix"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.4.10",
+		"@release-it/conventional-changelog": "^10.0.6",
+		"@types/node": "^25.5.2",
+		"husky": "^9.1.7",
+		"lint-staged": "^16.4.0",
+		"release-it": "^19.2.4",
+		"typescript": "^6.0.2",
+		"vite": "^8.0.3"
+	}
 }
