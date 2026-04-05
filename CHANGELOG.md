@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.0](https://github.com/henryhale/vite-plugin-unit/compare/v2.0.0...v1.1.0) (2026-04-05)
+
+### Features
+
+* strip base path from dev server request URL ([5f80757](https://github.com/henryhale/vite-plugin-unit/commit/5f807579702beb1ab22f6c6b031e0cac877a9c96))
+
 ## 2.0.0 (2026-04-05)
 
 ### ⚠ BREAKING CHANGES

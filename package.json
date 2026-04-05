@@ -1,6 +1,6 @@
 {
 	"name": "vite-plugin-unit",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "A vite plugin to enable you build websites in units.",
 	"main": "./dist/index.js",
 	"module": "./dist/index.js",
