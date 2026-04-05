@@ -1,6 +1,7 @@
 name: Release NPM package
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
@@ -12,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    
+
       # Checkout project repository
       - name: Checkout
         uses: actions/checkout@v3
