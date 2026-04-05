@@ -1,23 +1,24 @@
 {
-  "compilerOptions": {
-    /* Visit https://aka.ms/tsconfig to read more about this file */
-    "target": "ESNext",
-    "lib": ["ESNext", "DOM"],
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "declaration": true,
-    "outDir": "./dist/",
-    "noEmitOnError": true,
-    "declarationDir": "./dist/",
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "alwaysStrict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "skipLibCheck": true
-  },
-  "include": ["source"],
+	"compilerOptions": {
+		/* Visit https://aka.ms/tsconfig to read more about this file */
+		"target": "ESNext",
+		"lib": ["ESNext", "DOM"],
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"declaration": true,
+		"rootDir": "./source",
+		"outDir": "./dist/",
+		"noEmitOnError": true,
+		"declarationDir": "./dist/",
+		"forceConsistentCasingInFileNames": true,
+		"strict": true,
+		"noImplicitAny": true,
+		"strictNullChecks": true,
+		"alwaysStrict": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"skipLibCheck": true
+	},
+	"include": ["source"],
 	"exclude": ["node_modules"]
 }

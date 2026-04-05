@@ -6,302 +6,337 @@
  *  @url https://github.com/henryhale/vite-plugin-unit
  */
 
-import { existsSync, readFileSync } from "node:fs";
-import { dirname, extname, join, resolve } from "node:path";
-import { cp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { log } from "node:console";
+import { existsSync, readFileSync } from "node:fs";
+import { cp, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { dirname, extname, join, resolve } from "node:path";
 import type { Plugin } from "vite";
 
 export type PluginOptions = {
-    pages: string;
-    template: string;
-    slot: string;
+	pages: string;
+	template: string;
+	slot: string;
 };
 
 const defaultOptions: PluginOptions = {
-    pages: "pages/",
-    template: "template.html",
-    slot: "<slot></slot>"
+	pages: "pages/",
+	template: "template.html",
+	slot: "<slot></slot>"
 };
 
 export default function plugin(options: Partial<PluginOptions> = {}): Plugin[] {
-    const opt = Object.assign({}, defaultOptions, options);
+	const opt = Object.assign({}, defaultOptions, options);
 
-    // https://stackoverflow.com/questions/64963450/dirname-is-not-defined
-    const __dirname = resolve(dirname(""));
+	// https://stackoverflow.com/questions/64963450/dirname-is-not-defined
+	const __dirname = resolve(dirname(""));
 
-    // unit file extension
-    const ext = ".unit";
+	// unit file extension
+	const ext = ".unit";
 
-    // source code folder
-    const srcDir = "src/";
+	// source code folder
+	const srcDir = "src/";
 
-    // intermediate output folder for unit.js
-    const outputDir = ".unit/";
+	// intermediate output folder for unit.js
+	const outputDir = ".unit/";
 
-    // regexp to match single html tag with attributes
-    const htmlRegex = /<(.+?) ([/]?|.+?)>/g;
+	// regexp to match single html tag with attributes
+	const htmlRegex = /<(.+?) ([/]?|.+?)>/g;
 
-    // import statements
-    const importRegex = /import (.+?) from "(.+?)"(.+?)/g;
+	// import statements
+	const importRegex = /import (.+?) from "(.+?)"(.+?)/g;
 
-    // html tag regexp
-    const tagRegex = /<(.+?)>/;
+	// html tag regexp
+	const tagRegex = /<(.+?)>/;
 
-    // regexp to match attributes in html tag
-    const attrRegex = /(\w+(?:-\w+)*)\s*=\s*["']([^"']+)["']/g;
+	// regexp to match attributes in html tag
+	const attrRegex = /(\w+(?:-\w+)*)\s*=\s*["']([^"']+)["']/g;
 
-    // regexp to match placeholders like {text}
-    const valueRegex = /{(\w*)}/g;
+	// regexp to match placeholders like {text}
+	const valueRegex = /{(\w*)}/g;
 
-    // mapping file path to thier contents
-    const pathToCode = new Map<string, string>();
+	// mapping file path to thier contents
+	const pathToCode = new Map<string, string>();
 
-    // function that compiles .unit files
-    function compile(file = "", code = ""): string {
-        let filePath = null;
-        let content = null;
-        const nameToPath = new Map<string, string>();
+	// function that compiles .unit files
+	function compile(file = "", code = ""): string {
+		let filePath = null;
+		let content = null;
+		const nameToPath = new Map<string, string>();
 
-        // create a key-value object from attributes of an html tag
-        function mapAttributes(attr = "") {
-            const map: { [k: string]: string } = {};
-            let match: RegExpExecArray | null;
-            while ((match = attrRegex.exec(attr)) !== null) {
-                map[match[1]] = match[2];
-            }
-            return map;
-        }
+		// create a key-value object from attributes of an html tag
+		function mapAttributes(attr = "") {
+			const map: { [k: string]: string } = {};
+			let match: RegExpExecArray | null = attrRegex.exec(attr);
+			while (match !== null) {
+				map[match[1]] = match[2];
+				match = attrRegex.exec(attr);
+			}
+			return map;
+		}
 
-        // remove all import statements while saving the import names & content
-        return (
-            code
-                .replace(importRegex, (_, importName, importPath) => {
-                    filePath = join(dirname(file), importPath);
-                    nameToPath.set(importName, filePath);
-                    if (!pathToCode.has(filePath)) {
-                        content = compile(filePath, readFileSync(filePath, "utf-8"));
-                        pathToCode.set(filePath, content);
-                    }
-                    return "";
-                })
-                // replace every html tag matching an import name
-                .replace(htmlRegex, (match, tag, attr = "") => {
-                    const path = nameToPath.get(tag);
-                    if (path) {
-                        // get rid of trailing forward slash
-                        if (attr.endsWith("/")) attr = attr.slice(0, -1);
-                        const map = mapAttributes(attr);
-                        return pathToCode
-                            .get(path)!
-                            .replace(valueRegex, (m, key) => {
-                                const value = map[key];
-                                if (value) {
-                                    delete map[key];
-                                    return value;
-                                }
-                                return m;
-                            })
-                            .replace(tagRegex, (m) => {
-                                const others = Object.entries(map).reduce((r, [k, v]) => {
-                                    return r + k + "=" + (/'/.test(v) ? `"${v}"` : `'${v}'`);
-                                }, "");
-                                return m.slice(0, -1) + " " + others + ">";
-                            });
-                    }
-                    return match;
-                })
-                .trim()
-        );
-    }
+		// remove all import statements while saving the import names & content
+		return (
+			code
+				.replace(importRegex, (_, importName, importPath) => {
+					filePath = join(dirname(file), importPath);
+					nameToPath.set(importName, filePath);
+					if (!pathToCode.has(filePath)) {
+						content = compile(
+							filePath,
+							readFileSync(filePath, "utf-8")
+						);
+						pathToCode.set(filePath, content);
+					}
+					return "";
+				})
+				// replace every html tag matching an import name
+				.replace(
+					htmlRegex,
+					(match: string, tag: string, attr: string) => {
+						const path = nameToPath.get(tag);
+						if (path) {
+							// get rid of trailing forward slash
+							if (attr.endsWith("/")) attr = attr.slice(0, -1);
+							const map = mapAttributes(attr);
+							return (
+								pathToCode
+									.get(path)
+									?.replace(valueRegex, (m, key) => {
+										const value = map[key];
+										if (value) {
+											delete map[key];
+											return value;
+										}
+										return m;
+									})
+									.replace(tagRegex, (m) => {
+										const others = Object.entries(
+											map
+										).reduce((r, [k, v]) => {
+											return `${r + k}=${/'/.test(v) ? `"${v}"` : `'${v}'`}`;
+										}, "");
+										return `${m.slice(0, -1)} ${others}>`;
+									}) ?? ""
+							);
+						}
+						return match;
+					}
+				)
+				.trim()
+		);
+	}
 
-    return [
-        {
-            /**
-             * Unit.js - Server plugin
-             */
-            name: "vite-plugin-unit-serve",
+	return [
+		{
+			/**
+			 * Unit.js - Server plugin
+			 */
+			name: "vite-plugin-unit-serve",
 
-            /**
-             * use this plugin in development mode
-             */
-            apply: "serve",
+			/**
+			 * use this plugin in development mode
+			 */
+			apply: "serve",
 
-            /**
-             * partial config
-             */
-            config() {
-                return {
-                    root: srcDir
-                };
-            },
+			/**
+			 * partial config
+			 */
+			config() {
+				return {
+					root: srcDir
+				};
+			},
 
-            /**
-             * intercept vite server requests and compile .unit files on demand
-             */
-            configureServer({ middlewares, config }) {
-                /**
-                 * register a middleware to intercept the server's requests
-                 */
-                middlewares.use(async (req, res, next) => {
-                    /**
-                     * function to send compiled .unit file as html
-                     */
-                    async function respond(file: string) {
-                        res.statusCode = 200;
-                        res.setHeader("Content-Type", "text/html");
-                        const contents = await readFile(join(config.root, opt.template), { encoding: "utf-8" });
-                        pathToCode.clear();
-                        const compiled = compile(file, await readFile(file, { encoding: "utf-8" }));
-                        res.end(contents.replace(opt.slot, compiled));
-                    }
+			/**
+			 * intercept vite server requests and compile .unit files on demand
+			 */
+			configureServer({ middlewares, config }) {
+				/**
+				 * register a middleware to intercept the server's requests
+				 */
+				middlewares.use(async (req, res, next) => {
+					/**
+					 * function to send compiled .unit file as html
+					 */
+					async function respond(file: string) {
+						res.statusCode = 200;
+						res.setHeader("Content-Type", "text/html");
+						const contents = await readFile(
+							join(config.root, opt.template),
+							{
+								encoding: "utf-8"
+							}
+						);
+						pathToCode.clear();
+						const compiled = compile(
+							file,
+							await readFile(file, { encoding: "utf-8" })
+						);
+						res.end(contents.replace(opt.slot, compiled));
+					}
 
-                    // folder containing pages
-                    const srcDir = join(config.root, opt.pages);
+					// folder containing pages
+					const srcDir = join(config.root, opt.pages);
 
-                    // generate actual file path
-                    let filePath = join(srcDir, req.url + (req.url?.endsWith("/") ? "index.html" : ""));
+					// generate actual file path
+					let filePath = join(
+						srcDir,
+						req.url + (req.url?.endsWith("/") ? "index.html" : "")
+					);
 
-                    // check if the requested html file does not exist
-                    if (filePath.endsWith(".html") && !existsSync(filePath)) {
-                        filePath = filePath.replace(".html", ext);
-                        if (existsSync(filePath)) {
-                            // print request to the console
-                            log(req.method?.toUpperCase(), req.url, filePath.slice(config?.root?.length || 0));
+					// check if the requested html file does not exist
+					if (filePath.endsWith(".html") && !existsSync(filePath)) {
+						filePath = filePath.replace(".html", ext);
+						if (existsSync(filePath)) {
+							// print request to the console
+							log(
+								req.method?.toUpperCase(),
+								req.url,
+								filePath.slice(config?.root?.length || 0)
+							);
 
-                            // send requested file
-                            return await respond(filePath);
-                        }
-                    }
+							// send requested file
+							return await respond(filePath);
+						}
+					}
 
-                    // try checking if the requested asset exists in the `src` folder
-                    if (filePath.lastIndexOf(".") > -1) {
-                        filePath = join(config.root, req.url!);
-                        if (existsSync(filePath)) {
-                            // direct the file path relative to the `src` folder
-                            req.url = filePath;
-                        }
-                    }
+					// try checking if the requested asset exists in the `src` folder
+					if (filePath.lastIndexOf(".") > -1) {
+						filePath = join(config.root, req.url || "");
+						if (existsSync(filePath)) {
+							// direct the file path relative to the `src` folder
+							req.url = filePath;
+						}
+					}
 
-                    return next();
-                });
-            }
-        },
-        {
-            /**
-             * Unit.js - Build plugin
-             */
-            name: "vite-plugin-unit-build",
+					return next();
+				});
+			}
+		},
+		{
+			/**
+			 * Unit.js - Build plugin
+			 */
+			name: "vite-plugin-unit-build",
 
-            /**
-             * only apply this plugin on `vite build` command
-             */
-            apply: "build",
+			/**
+			 * only apply this plugin on `vite build` command
+			 */
+			apply: "build",
 
-            /**
-             * modify vite config in favor of this plugin
-             */
-            config() {
-                return {
-                    base: "./",
-                    root: outputDir
-                };
-            },
+			/**
+			 * modify vite config in favor of this plugin
+			 */
+			config() {
+				return {
+					base: "./",
+					root: outputDir
+				};
+			},
 
-            /**
-             * function invoked when the build process begins
-             */
-            async buildStart(options) {
-                const output = join(__dirname, outputDir);
+			/**
+			 * function invoked when the build process begins
+			 */
+			async buildStart(options) {
+				const output = join(__dirname, outputDir);
 
-                /**
-                 * Create unit.js compiled output directory
-                 */
-                if (existsSync(output)) {
-                    await rm(output, { recursive: true, force: true });
-                }
-                await mkdir(outputDir);
+				/**
+				 * Create unit.js compiled output directory
+				 */
+				if (existsSync(output)) {
+					await rm(output, { recursive: true, force: true });
+				}
+				await mkdir(outputDir);
 
-                /**
-                 * Copy entire `src/` to `.unit/`
-                 */
-                await cp("./src/", outputDir, { recursive: true });
+				/**
+				 * Copy entire `src/` to `.unit/`
+				 */
+				await cp("./src/", outputDir, { recursive: true });
 
-                /**
-                 * Grab the template file
-                 */
-                const templateFile = join(outputDir, opt.template);
-                const template = await readFile(templateFile, { encoding: "utf-8" });
+				/**
+				 * Grab the template file
+				 */
+				const templateFile = join(outputDir, opt.template);
+				const template = await readFile(templateFile, {
+					encoding: "utf-8"
+				});
 
-                /**
-                 * Capture the pages
-                 */
-                const srcDir = join(outputDir, "./pages/");
-                const srcFiles = await readdir(srcDir, { recursive: true });
-                const pages = srcFiles.filter((file) => extname(file) === ext);
-                log("pages: ", pages);
+				/**
+				 * Capture the pages
+				 */
+				const srcDir = join(outputDir, "./pages/");
+				const srcFiles = await readdir(srcDir, { recursive: true });
+				const pages = srcFiles.filter((file) => extname(file) === ext);
+				log("pages: ", pages);
 
-                /**
-                 * Function that generate .html file from compiled .unit file
-                 */
-                async function generateBuild(page: string) {
-                    const filePath = join(srcDir, page);
-                    if (Array.isArray(options.input)) {
-                        options.input.push(join(outputDir, page.replace(ext, ".html")));
-                    } else {
-                        // ...
-                    }
-                    const fileContent = await readFile(filePath, { encoding: "utf-8" });
-                    const compiledPage = compile(filePath, fileContent);
-                    const result = template.replace(opt.slot, compiledPage);
-                    log("build: ", page);
-                    const fullPath = join(outputDir, page.replace(ext, ".html"));
-                    const dirPath = dirname(fullPath);
-                    if (!existsSync(dirPath)) {
-                        await mkdir(dirPath, { recursive: true });
-                    }
-                    return await writeFile(fullPath, result);
-                }
+				/**
+				 * Function that generate .html file from compiled .unit file
+				 */
+				async function generateBuild(page: string) {
+					const filePath = join(srcDir, page);
+					if (Array.isArray(options.input)) {
+						options.input.push(
+							join(outputDir, page.replace(ext, ".html"))
+						);
+					} else {
+						// ...
+					}
+					const fileContent = await readFile(filePath, {
+						encoding: "utf-8"
+					});
+					const compiledPage = compile(filePath, fileContent);
+					const result = template.replace(opt.slot, compiledPage);
+					log("build: ", page);
+					const fullPath = join(
+						outputDir,
+						page.replace(ext, ".html")
+					);
+					const dirPath = dirname(fullPath);
+					if (!existsSync(dirPath)) {
+						await mkdir(dirPath, { recursive: true });
+					}
+					return await writeFile(fullPath, result);
+				}
 
-                /**
-                 * Clear the input files
-                 */
-                if (options.input.length) {
-                    options.input.length = 0;
-                } else {
-                    options.input = [];
-                }
+				/**
+				 * Clear the input files
+				 */
+				if (options.input.length) {
+					options.input.length = 0;
+				} else {
+					options.input = [];
+				}
 
-                /**
-                 * Generate builds, add input files for rollup to resolve dependencies
-                 */
-                await Promise.all(pages.map((page) => generateBuild(page)));
-            },
+				/**
+				 * Generate builds, add input files for rollup to resolve dependencies
+				 */
+				await Promise.all(pages.map((page) => generateBuild(page)));
+			},
 
-            /**
-             * function invoked when the output bundle is complete
-             */
-            async closeBundle() {
-                /**
-                 * Remove the dist folder if exists
-                 */
-                const distFolder = join(__dirname, "dist");
-                if (existsSync(distFolder)) {
-                    await rm(distFolder, { recursive: true, force: true });
-                }
+			/**
+			 * function invoked when the output bundle is complete
+			 */
+			async closeBundle() {
+				/**
+				 * Remove the dist folder if exists
+				 */
+				const distFolder = join(__dirname, "dist");
+				if (existsSync(distFolder)) {
+					await rm(distFolder, { recursive: true, force: true });
+				}
 
-                /**
-                 * Copy the entire unit dist folder to the root of the project
-                 */
-                await cp(outputDir + "dist", distFolder, { recursive: true });
+				/**
+				 * Copy the entire unit dist folder to the root of the project
+				 */
+				await cp(`${outputDir}dist`, distFolder, { recursive: true });
 
-                // await new Promise((res) => setTimeout(res, 5000));
+				// await new Promise((res) => setTimeout(res, 5000));
 
-                /**
-                 * Delete the entire unit output folder
-                 */
-                await rm(outputDir, { recursive: true, force: true });
-            }
-        }
-    ];
+				/**
+				 * Delete the entire unit output folder
+				 */
+				await rm(outputDir, { recursive: true, force: true });
+			}
+		}
+	];
 }
